@@ -1,12 +1,14 @@
 'use client';
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatWindow from "@/components/chat-window";
 import NameInput from "@/components/name-input";
+import { connectWebSocket } from "@/socket";
 
 export default function Home() {
-  const timer = useRef(null);
-  const socket = useRef(null);
+
+  const socket:any = useRef(null);
+
   const [userName, setUserName] = useState('');
   const [showNamePopup, setShowNamePopup] = useState(true);
   const [inputName, setInputName] = useState('');
@@ -15,6 +17,10 @@ export default function Home() {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
 
+  // connect with socket:
+  useEffect(()=> {
+    socket.current = connectWebSocket();
+  }, [])
 
   // handleNameSubmit:
   function handleNameSubmit(e: React.FormEvent) {
@@ -26,7 +32,7 @@ export default function Home() {
     setShowNamePopup(false);
   }
 
-  // SEND MESSAGE FUNCTION
+  // sendMessage:
   function sendMessage() {
     const t = text.trim();
     if (!t) return;
@@ -44,14 +50,6 @@ export default function Home() {
     // socket.current.emit('chatMessage', msg);
 
     setText('');
-  }
-
-  // HANDLE ENTER KEY TO SEND MESSAGE
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
   }
 
   return (
@@ -73,7 +71,6 @@ export default function Home() {
           messages={messages}
           text={text}
           setText={setText}
-          handleKeyDown={handleKeyDown}
           sendMessage={sendMessage}
         />
       )}

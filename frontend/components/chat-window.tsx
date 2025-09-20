@@ -7,7 +7,6 @@ interface ChatWindowProps {
     messages: never[];
     text: string;
     setText: React.Dispatch<React.SetStateAction<string>>,
-    handleKeyDown: (e: React.KeyboardEvent) => void;
     sendMessage: () => void
 }
 
@@ -17,9 +16,17 @@ const ChatWindow = ({
     messages,
     text,
     setText,
-    handleKeyDown,
     sendMessage
 }: ChatWindowProps) => {
+
+    // handleKeyDown
+    function handleKeyDown(e: React.KeyboardEvent) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+
     return (
         <div className="w-full max-w-2xl h-[90vh] bg-white rounded-xl shadow-md flex flex-col overflow-hidden">
             {/* CHAT HEADER */}
@@ -50,7 +57,7 @@ const ChatWindow = ({
 
             {/* CHAT MESSAGE LIST */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-zinc-100 flex flex-col">
-                {messages.map((m:any) => {
+                {messages.map((m: any) => {
                     const mine = m.sender === userName;
                     return (
                         <div
