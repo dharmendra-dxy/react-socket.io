@@ -4,7 +4,7 @@ import React from "react";
 interface ChatWindowProps {
     typers: never[];
     userName: string;
-    messages: never[];
+    messages: any;
     text: string;
     setText: React.Dispatch<React.SetStateAction<string>>,
     sendMessage: () => void

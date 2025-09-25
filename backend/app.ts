@@ -14,8 +14,18 @@ const io = new Server(server,{
     }
 });
 
-io.on('connection', (server) => {
-    console.log("A connection established", server.id);
+const ROOM="group";
+
+io.on('connection', (socket) => {
+    console.log("A connection established", socket.id);
+
+    socket.on("joinRoom", async (userName: string)=> {
+        console.log(`${userName} has joined the group`);
+        
+        await socket.join(ROOM)
+    });
+
+
 })
 
 

@@ -14,12 +14,16 @@ export default function Home() {
   const [inputName, setInputName] = useState('');
   const [typers, setTypers] = useState([]);
 
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState('');
 
   // connect with socket:
   useEffect(()=> {
     socket.current = connectWebSocket();
+
+    socket.current.on("connect", ()=> {
+      socket.current.emit("joinRoom", userName);
+    });
   }, [])
 
   // handleNameSubmit:
@@ -27,6 +31,9 @@ export default function Home() {
     e.preventDefault();
     const trimmed = inputName.trim();
     if (!trimmed) return;
+
+    // join room when submit occurs:
+    socket.current.emit("joinRoom", trimmed);
 
     setUserName(trimmed);
     setShowNamePopup(false);
@@ -44,7 +51,7 @@ export default function Home() {
       text: t,
       ts: Date.now(),
     };
-    setMessages((m) => [...m, msg]);
+    setMessages((m:any) => [...m, msg]);
 
     // emit
     // socket.current.emit('chatMessage', msg);
