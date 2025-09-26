@@ -7,6 +7,8 @@ import { connectWebSocket } from "@/socket";
 
 export default function Home() {
 
+  const timer = useRef(null);
+
   const socket: any = useRef(null);
 
   const [userName, setUserName] = useState('');
@@ -33,90 +35,99 @@ export default function Home() {
         setMessages((prev) => [...prev, msg]);
       })
 
-      socket.current.on("typing", (userName:string) => {
+      socket.current.on("typing", (userName: string) => {
         setTypers((prev) => {
-          const isExist = prev.find((typer) => typer===userName);
-          if(!isExist) return [...prev , userName];
+          const isExist = prev.find((typer) => typer === userName);
+          if (!isExist) return [...prev, userName];
 
           return prev;
         });
       })
 
-      socket.current.on("stopTyping", (userName:string) => {
-        setTypers((prev) => prev.filter((typer) => typer!==userName));
+      socket.current.on("stopTyping", (userName: string) => {
+        setTypers((prev) => prev.filter((typer) => typer !== userName));
       })
 
     });
+
+    // clean-up all the socket
+    return () => {
+      socket.current.off("roomNotice");
+      socket.current.off("chatMessage");
+      socket.current.off("typing");
+      socket.current.off("stopTyping");
+    }
 
   }, [])
 
   useEffect(() => {
     if (text) {
       socket.current.emit("typing", userName);
-
-      setTimeout(()=>{
-      socket.current.emit("stopTyping", userName);
-
-      }, 1000);
+      clearTimeout(timer.current);
     }
-}, [text, userName]);
 
-// handleNameSubmit:
-function handleNameSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  const trimmed = inputName.trim();
-  if (!trimmed) return;
+    timer.current = setTimeout(() => {
+      socket.current.emit("stopTyping", userName);
+    }, 1000);
 
-  // join room when submit occurs:
-  socket.current.emit("joinRoom", trimmed);
+  }, [text, userName]);
 
-  setUserName(trimmed);
-  setShowNamePopup(false);
-}
+  // handleNameSubmit:
+  function handleNameSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = inputName.trim();
+    if (!trimmed) return;
 
-// sendMessage:
-function sendMessage() {
-  const t = text.trim();
-  if (!t) return;
+    // join room when submit occurs:
+    socket.current.emit("joinRoom", trimmed);
 
-  // USER MESSAGE
-  const msg = {
-    id: Date.now(),
-    sender: userName,
-    text: t,
-    ts: Date.now(),
-  };
-  setMessages((m: any) => [...m, msg]);
+    setUserName(trimmed);
+    setShowNamePopup(false);
+  }
 
-  // emit
-  socket.current.emit('chatMessage', msg);
+  // sendMessage:
+  function sendMessage() {
+    const t = text.trim();
+    if (!t) return;
 
-  setText('');
-}
+    // USER MESSAGE
+    const msg = {
+      id: Date.now(),
+      sender: userName,
+      text: t,
+      ts: Date.now(),
+    };
+    setMessages((m: any) => [...m, msg]);
 
-return (
-  <div className="min-h-screen flex items-center justify-center bg-zinc-100 p-4 font-inter">
-    {/* Name Input fields: */}
-    {showNamePopup && (
-      <NameInput
-        handleNameSubmit={handleNameSubmit}
-        inputName={inputName}
-        setInputName={setInputName}
-      />
-    )}
+    // emit
+    socket.current.emit('chatMessage', msg);
 
-    {/* Chat window: */}
-    {!showNamePopup && (
-      <ChatWindow
-        typers={typers}
-        userName={userName}
-        messages={messages}
-        text={text}
-        setText={setText}
-        sendMessage={sendMessage}
-      />
-    )}
-  </div>
-)
+    setText('');
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-zinc-100 p-4 font-inter">
+      {/* Name Input fields: */}
+      {showNamePopup && (
+        <NameInput
+          handleNameSubmit={handleNameSubmit}
+          inputName={inputName}
+          setInputName={setInputName}
+        />
+      )}
+
+      {/* Chat window: */}
+      {!showNamePopup && (
+        <ChatWindow
+          typers={typers}
+          userName={userName}
+          messages={messages}
+          text={text}
+          setText={setText}
+          sendMessage={sendMessage}
+        />
+      )}
+    </div>
+  )
 
 }
