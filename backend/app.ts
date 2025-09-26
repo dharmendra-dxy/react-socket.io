@@ -34,9 +34,21 @@ io.on('connection', (socket) => {
 
 
     // ---ChatMessage
-    socket.on("chatMessage", async(msg: string) =>{
+    socket.on("chatMessage", (msg: string) =>{
         // brodcast:
         socket.to(ROOM).emit("chatMessage", msg);
+    })
+
+    // ---Typing
+    socket.on("typing", (userName: string) =>{
+        // brodcast:
+        socket.to(ROOM).emit("typing", userName);
+    })
+
+    // ---StopTyping
+    socket.on("stopTyping", (userName: string) =>{
+        // brodcast:
+        socket.to(ROOM).emit("stopTyping", userName);
     })
 
 })

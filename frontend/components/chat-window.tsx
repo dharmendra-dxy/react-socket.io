@@ -2,7 +2,7 @@ import { formatTime } from "@/utils/format-time";
 import React from "react";
 
 interface ChatWindowProps {
-    typers: never[];
+    typers: string[];
     userName: string;
     messages: any;
     text: string;
@@ -39,7 +39,7 @@ const ChatWindow = ({
                         Realtime group chat
                     </div>
 
-                    {typers.length ? (
+                    {typers?.length ? (
                         <div className="text-xs text-gray-500">
                             {typers.join(', ')} is typing...
                         </div>
