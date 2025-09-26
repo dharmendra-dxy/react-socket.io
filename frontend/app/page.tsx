@@ -14,7 +14,7 @@ export default function Home() {
   const [inputName, setInputName] = useState('');
   const [typers, setTypers] = useState([]);
 
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);  
   const [text, setText] = useState('');
 
   // connect with socket:
@@ -22,8 +22,18 @@ export default function Home() {
     socket.current = connectWebSocket();
 
     socket.current.on("connect", ()=> {
-      socket.current.emit("joinRoom", userName);
+      socket.current.on("roomNotice", ()=>{
+        console.log(`${userName} has joined the group - client`);
+      });
+
+      socket.current.on("chatMessage", (msg:any)=>{
+        // push message to existing list:
+        console.log("message [client] - ", msg);
+        setMessages((prev) => [...prev, msg]);
+      })
     });
+
+    
   }, [])
 
   // handleNameSubmit:
@@ -54,23 +64,23 @@ export default function Home() {
     setMessages((m:any) => [...m, msg]);
 
     // emit
-    // socket.current.emit('chatMessage', msg);
+    socket.current.emit('chatMessage', msg);
 
     setText('');
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-100 p-4 font-inter">
-      {/* ENTER YOUR NAME TO START CHATTING */}
+      {/* Name Input fields: */}
       {showNamePopup && (
         <NameInput
           handleNameSubmit={handleNameSubmit}
           inputName={inputName}
           setInputName={setInputName}
         />
-      )}``
+      )}
 
-      {/* CHAT WINDOW */}
+      {/* Chat window: */}
       {!showNamePopup && (
         <ChatWindow
           typers={typers}

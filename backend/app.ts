@@ -19,12 +19,25 @@ const ROOM="group";
 io.on('connection', (socket) => {
     console.log("A connection established", socket.id);
 
+    // ---JoinRoom---
     socket.on("joinRoom", async (userName: string)=> {
-        console.log(`${userName} has joined the group`);
+        console.log(`${userName} has joined the group - server`);
         
         await socket.join(ROOM)
+
+        // send to all:
+        // io.to(ROOM).emit("roomNotice", userName);
+
+        // brodcast:
+        socket.to(ROOM).emit("roomNotice", userName);
     });
 
+
+    // ---ChatMessage
+    socket.on("chatMessage", async(msg: string) =>{
+        // brodcast:
+        socket.to(ROOM).emit("chatMessage", msg);
+    })
 
 })
 
